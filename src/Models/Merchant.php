@@ -19,7 +19,6 @@ class Merchant{
 
     private $language;
     private $merchantId;
-    private $referenceId;
     private $username;
     private $password;
     private $availableProperties = ['auto_return', 'error_url', 'hash_string', 'language', 'merchant_id', 'username', 'password', 'reference_id', 'post_url', 'return_url'];
@@ -47,13 +46,19 @@ class Merchant{
         if(!is_array($hash))
             $this->hash = $hash;
         else{
-            foreach($hash as $property => $value)
-                $this->$property = $value;
+            foreach($hash as $property => $value){
+                if($property == 'hash_string')
+                    $this->hash = $value;
+                elseif($property == 'lang_code')
+                    $this->language = $value;
+                else
+                    $this->{camel_case($property)} = $value;
+            }
         }
     }
 
     public function __set($name, $value){
-        if(in_array($name, $this->availableProperties))
+        if(in_array(snake_case($name), $this->availableProperties))
             $this->$name = $value;
     }
 
@@ -68,17 +73,17 @@ class Merchant{
                 if($availableProperty == 'username')
                     $merchant['UserName'] = $this->$availableProperty;
                 elseif($availableProperty == 'merchant_id' || $availableProperty == 'reference_id')
-                    $merchant[str_replace('Id', 'ID', studly_case($availableProperty))] = $this->{camel_case($availableProperty)} = $this->$availableProperty;
+                    $merchant[str_replace('Id', 'ID', studly_case($availableProperty))] = $this->{camel_case($availableProperty)};
                 elseif($availableProperty == 'return_url')
-                    $merchant[str_replace('Url', 'URL', studly_case($availableProperty))] = $this->{camel_case($availableProperty)} = $this->$availableProperty;
+                    $merchant[str_replace('Url', 'URL', studly_case($availableProperty))] = $this->{camel_case($availableProperty)};
                 elseif($availableProperty == 'post_url')
-                    $merchant[str_replace('Url', 'URL', studly_case($availableProperty))] = $this->$availableProperty;
+                    $merchant[str_replace('Url', 'URL', studly_case($availableProperty))] = $this->{camel_case($availableProperty)};
                 elseif($availableProperty == 'language')
                     $merchant['LangCode'] = $this->$availableProperty;
                 elseif($availableProperty == 'hash_string')
-                    $merchant[studly_case($availableProperty)] = $this->hash = $this->$availableProperty;
+                    $merchant[studly_case($availableProperty)] = $this->hash;
                 else
-                    $merchant[studly_case($availableProperty)] = $this->{camel_case($availableProperty)} = $this->$availableProperty;
+                    $merchant[studly_case($availableProperty)] = $this->{camel_case($availableProperty)};
             }
         }
         return $merchant;

@@ -61,6 +61,21 @@ class ProductCollection implements \Iterator{
     }
 
     /**
+     * @return int
+     */
+    public function key(){
+        return key($this->products);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function valid(){
+        return ($index = $this->key())? (isset($this->products[$index])) : false;
+    }
+
+
+    /**
      * Getting a specific product form the list by its index.
      * @param int $index Index of the product to get
      * @return Product

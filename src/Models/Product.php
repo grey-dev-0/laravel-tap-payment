@@ -22,11 +22,13 @@ class Product{
     public function __construct($product){
         $this->currencyCode = config('tap-payment.currency', 'KWD');
         $this->unitName = $product[config('tap-payment.name-field', 'name')];
-        $this->unitPrice = $product[config('tap-payment.price-field', 'price')];
+        $this->unitPrice = $product[config('tap-payment.price-field', 'unit_price')];
         $this->unitDesc = $product[config('tap-payment.description-field', 'description')];
         $this->quantity = $product[config('tap-payment.quantity-field', 'quantity')];
-        foreach(array_only($this->availableProperties, ['total_price', 'unit_id', 'img_url', 'vnd_id']) as $extraProperty => &$value)
-            $this->$extraProperty = $value;
+        $extraProperties = ['total_price', 'unit_id', 'img_url', 'vnd_id'];
+        foreach($extraProperties as &$extraProperty)
+            if(isset($product[$extraProperty]))
+                $this->{camel_case($extraProperty)} = $product[$extraProperty];
     }
 
     public function __set($name, $value){
@@ -40,13 +42,13 @@ class Product{
     public function toArray(){
         $product = [];
         foreach($this->availableProperties as &$availableProperty){
-            if(isset($this->$availableProperty)){
+            if(isset($this->{camel_case($availableProperty)})){
                 if(strpos($availableProperty, '_') == -1)
-                    $product[ucfirst($availableProperty)] = $this->$availableProperty;
+                    $product[ucfirst($availableProperty)] = $this->{camel_case($availableProperty)};
                 elseif(strpos($availableProperty, '_id') != -1)
-                    $product[str_replace('Id', 'ID', studly_case($availableProperty))] = $this->{camel_case($availableProperty)} = $this->$availableProperty;
+                    $product[str_replace('Id', 'ID', studly_case($availableProperty))] = $this->{camel_case($availableProperty)};
                 else
-                    $product[studly_case($availableProperty)] = $this->{camel_case($availableProperty)} = $this->$availableProperty;
+                    $product[studly_case($availableProperty)] = $this->{camel_case($availableProperty)};
             }
         }
         return $product;

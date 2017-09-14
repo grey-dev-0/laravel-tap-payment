@@ -30,7 +30,7 @@ class Customer{
     }
 
     public function __set($name, $value){
-        if(in_array($name, $this->availableProperties))
+        if(in_array(snake_case($name), $this->availableProperties))
             $this->$name = $value;
     }
 
