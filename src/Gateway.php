@@ -90,4 +90,20 @@ class Gateway{
             return false;
         }
     }
+
+    /**
+     * Determining whether a payment is done successfully.
+     *
+     * @var boolean $sandbox Determines which merchant ID to use; test ID or production ID.
+     *
+     * @return boolean
+     */
+    public function isValid($sandbox = false){
+        $referenceId = request('ref');
+        $orderId = request('trackid');
+        $result = request('result');
+        $merchantId = ($sandbox)? '1014' : env('TAP_MERCHANT_ID', '1014');
+
+        return (hash_hmac('sha256', "x_account_id{$merchantId}x_ref{$referenceId}x_result{$result}x_referenceid{$orderId}", env('TAP_API_KEY', '1tap7')) == request('hash'));
+    }
 }
